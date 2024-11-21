@@ -5,36 +5,52 @@ import altair as alt
 
 
 @st.cache_data
-def load_data(csv_path=r"C:\Documents\pythonProject\streamlit\all_data.csv"):
+def load_data(folder_path=r"C:\Documents\pythonProject\streamlit\names"):
     # Initialize an empty DataFrame
-    data = pd.DataFrame()
+    all_data = pd.DataFrame()
 
-    # Verify CSV file existence
-    if not os.path.exists(csv_path):
-        st.error(f"The file '{csv_path}' does not exist.")
-        print(f"File does not exist: {csv_path}")
-        return data
+    # Verify folder existence
+    if not os.path.exists(folder_path):
+        st.error(f"The folder '{folder_path}' does not exist.")
+        print(f"Folder does not exist: {folder_path}")
+        return all_data
 
-    # Load the CSV file into a DataFrame
-    try:
-        data = pd.read_csv(csv_path)
-        print(f"Data successfully loaded from {csv_path}")
-    except Exception as e:
-        st.error(f"Error reading the file '{csv_path}': {e}")
-        print(f"Error reading the file: {e}")
+    # List files in folder for debugging
+    files = os.listdir(folder_path)
+    print(f"Files in folder: {files}")
 
-    if data.empty:
-        print("No data was loaded. Check the file path and content.")
+    # Iterate through all files in the folder
+    for filename in files:
+        if filename.endswith(".txt"):  # Ensure it's a text file
+            file_path = os.path.join(folder_path, filename)
+            try:
+                data = pd.read_csv(
+                    file_path,
+                    header=None,  # No header in the file
+                    names=["Name", "Sex", "Births"]  # Assign column names
+                )
 
-    return data
+                # Append data to the main DataFrame
+                all_data = pd.concat([all_data, data], ignore_index=True)
+            except Exception as e:
+                st.error(f"Error reading file '{filename}': {e}")
+                print(f"Error in {filename}: {e}")
+        else:
+            print(f"Skipping non-txt file: {filename}")
+
+    if all_data.empty:
+        print("No data was loaded. Check your folder path and file formats.")
+
+    return all_data
 
 
-# Attempt to load data from the CSV file
+# Attempt to load data
 data = load_data()
+
 
 # Check if data is empty
 if data.empty:
-    st.error("No data found. Please check the CSV file and ensure it contains valid data.")
+    st.error("No data found. Please check the folder and ensure it contains valid files.")
     st.stop()
 
 # Debug information
@@ -101,5 +117,5 @@ with st.container():
 
 # Deployment Instructions in Sidebar
 st.sidebar.write("#### Deployment Instructions")
-st.sidebar.write("1. Ensure the dataset 'all_data.csv' is in the specified path.")
+st.sidebar.write("1. Save the dataset into a file (e.g., 'names.csv').")
 st.sidebar.write("2. Run `streamlit run app.py` to start the app.")
