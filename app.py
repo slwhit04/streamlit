@@ -5,7 +5,7 @@ import altair as alt
 
 
 @st.cache_data
-def load_data(folder_path=r"C:\Documents\pythonProject\streamlit\names"):
+def load_data(folder_path=r"names"):
     # Initialize an empty DataFrame
     all_data = pd.DataFrame()
 
